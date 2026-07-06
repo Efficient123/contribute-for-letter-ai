@@ -76,103 +76,114 @@
     <button onclick="downloadImage()">Download PNG</button>
 
     <script>
-
         const grid = document.getElementById("grid");
 
-        let drawing = false;
+let drawing = false;
+let isErasing = false; // Tracks if we are drawing or erasing during a drag
 
-        function paint(pixel) {
-            pixel.classList.add("black");
-        }
+function paint(pixel) {
+    if (isErasing) {
+        pixel.classList.remove("black");
+    } else {
+        pixel.classList.add("black");
+    }
+}
 
-        for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 100; i++) {
 
-            const pixel = document.createElement("div");
-            pixel.className = "pixel";
+    const pixel = document.createElement("div");
+    pixel.className = "pixel";
 
-            pixel.addEventListener("mousedown", (e) => {
-                e.preventDefault();
-                drawing = true;
-                paint(pixel);
-            });
+    pixel.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        drawing = true;
+        
+        // If the pixel is already black, we switch to erasing mode
+        isErasing = pixel.classList.contains("black"); 
+        paint(pixel);
+    });
 
-            pixel.addEventListener("mouseenter", () => {
-                if (drawing)
-                    paint(pixel);
-            });
+    pixel.addEventListener("mouseenter", () => {
+        if (drawing)
+            paint(pixel);
+    });
 
-            // Mobile
-            pixel.addEventListener("touchstart", (e) => {
-                e.preventDefault();
-                drawing = true;
-                paint(pixel);
-            }, { passive: false });
+    // Mobile
+    pixel.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        drawing = true;
+        
+        // If the pixel is already black, we switch to erasing mode
+        isErasing = pixel.classList.contains("black");
+        paint(pixel);
+    }, { passive: false });
 
-            grid.appendChild(pixel);
-        }
+    grid.appendChild(pixel);
+}
 
-        document.addEventListener("mouseup", () => drawing = false);
-        document.addEventListener("touchend", () => drawing = false);
+document.addEventListener("mouseup", () => drawing = false);
+document.addEventListener("touchend", () => drawing = false);
 
-        document.addEventListener("touchmove", (e) => {
+document.addEventListener("touchmove", (e) => {
 
-            if (!drawing) return;
+    if (!drawing) return;
 
-            e.preventDefault();
+    e.preventDefault();
 
-            const touch = e.touches[0];
-            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    const touch = e.touches[0];
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
 
-            if (element && element.classList.contains("pixel")) {
-                paint(element);
-            }
+    if (element && element.classList.contains("pixel")) {
+        paint(element);
+    }
 
-        }, { passive: false });
+}, { passive: false });
 
-        function clearGrid() {
-            document.querySelectorAll(".pixel").forEach(pixel => {
-                pixel.classList.remove("black");
-            });
-        }
+function clearGrid() {
+    document.querySelectorAll(".pixel").forEach(pixel => {
+        pixel.classList.remove("black");
+    });
+}
 
-        function downloadImage() {
+function downloadImage() {
 
-            const letter = document.getElementById("letter").value.trim();
+    const letter = document.getElementById("letter").value.trim();
 
-            if (letter.length !== 1) {
-                alert("Please enter the letter you're drawing.");
-                return;
-            }
+    if (letter.length !== 1) {
+        alert("Please enter the letter you're drawing.");
+        return;
+    }
 
-            const canvas = document.createElement("canvas");
-            canvas.width = 100;
-            canvas.height = 100;
+    const canvas = document.createElement("canvas");
+    canvas.width = 100;
+    canvas.height = 100;
 
-            const ctx = canvas.getContext("2d");
-            ctx.imageSmoothingEnabled = false;
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
 
-            const pixels = document.querySelectorAll(".pixel");
+    const pixels = document.querySelectorAll(".pixel");
 
-            pixels.forEach((pixel, i) => {
+    pixels.forEach((pixel, i) => {
 
-                const x = (i % 10) * 10;
-                const y = Math.floor(i / 10) * 10;
+        const x = (i % 10) * 10;
+        const y = Math.floor(i / 10) * 10;
 
-                ctx.fillStyle = pixel.classList.contains("black")
-                    ? "#000"
-                    : "#FFF";
+        ctx.fillStyle = pixel.classList.contains("black")
+            ? "#000"
+            : "#FFF";
 
-                ctx.fillRect(x, y, 10, 10);
-            });
+        ctx.fillRect(x, y, 10, 10);
+    });
 
-            const link = document.createElement("a");
-            link.download = `${letter}.png`;
-            link.href = canvas.toDataURL("image/png");
-            link.click();
+    const link = document.createElement("a");
+    link.download = `${letter}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
 
-            clearGrid();
-            document.getElementById("letter").focus();
-        }
+    clearGrid();
+    document.getElementById("letter").focus();
+}
+        
 
     </script>
 
