@@ -65,7 +65,7 @@
 
     <h2>Dataset Creator</h2>
 
-    <p>What letter are you drawing?</p>
+    <p>What letter are you drawing? A, C, D, E, F and G are done (case sensitive btw.) Don't do these.</p>
 
     <input id="letter" type="text" maxlength="1" autocomplete="off" spellcheck="false" placeholder="A">
 
@@ -89,7 +89,6 @@
             const pixel = document.createElement("div");
             pixel.className = "pixel";
 
-            // Desktop
             pixel.addEventListener("mousedown", (e) => {
                 e.preventDefault();
                 drawing = true;
