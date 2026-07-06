@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dataset Creator</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f5f5f5;
+            margin: 30px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            gap: 2px;
+            width: fit-content;
+            margin: 20px auto;
+        }
+
+        .pixel {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 1px solid black;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .black {
+            background: black;
+        }
+
+        input {
+            font-size: 18px;
+            padding: 8px;
+            width: 220px;
+            text-align: center;
+        }
+
+        button {
+            font-size: 16px;
+            padding: 10px 18px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        p {
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Dataset Creator</h2>
+
+    <p>What letter are you drawing?</p>
+
+    <input id="letter" type="text" maxlength="1" autocomplete="off" spellcheck="false" placeholder="A">
+
+    <div id="grid"></div>
+
+    <button onclick="clearGrid()">Clear</button>
+    <button onclick="downloadImage()">Download PNG</button>
+
+    <script>
+
+        const grid = document.getElementById("grid");
+
+        let drawing = false;
+
+        
+        for (let i = 0; i < 100; i++) {
+
+            const pixel = document.createElement("div");
+            pixel.className = "pixel";
+
+            pixel.onmousedown = () => {
+                drawing = true;
+                pixel.classList.toggle("black");
+            };
+
+            pixel.onmouseenter = () => {
+                if (drawing)
+                    pixel.classList.add("black");
+            };
+
+            grid.appendChild(pixel);
+        }
+
+        document.onmouseup = () => drawing = false;
+
+        function clearGrid() {
+            document.querySelectorAll(".pixel").forEach(pixel => {
+                pixel.classList.remove("black");
+            });
+        }
+
+        function downloadImage() {
+
+            const letter = document.getElementById("letter").value.trim();
+
+            if (letter.length !== 1) {
+                alert("Please enter the letter you're drawing.");
+                return;
+            }
+
+            
+            const canvas = document.createElement("canvas");
+            canvas.width = 100;
+            canvas.height = 100;
+
+            const ctx = canvas.getContext("2d");
+            ctx.imageSmoothingEnabled = false;
+
+            const pixels = document.querySelectorAll(".pixel");
+
+            pixels.forEach((pixel, i) => {
+
+                const x = (i % 10) * 10;
+                const y = Math.floor(i / 10) * 10;
+
+                ctx.fillStyle = pixel.classList.contains("black")
+                    ? "#000"
+                    : "#FFF";
+
+                ctx.fillRect(x, y, 10, 10);
+            });
+
+            const link = document.createElement("a");
+            link.download = `${letter}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+
+            clearGrid();
+            document.getElementById("letter").focus();
+        }
+
+    </script>
+
+</body>
+
+</html>
