@@ -11,6 +11,7 @@
             text-align: center;
             background: #f5f5f5;
             margin: 30px;
+            overscroll-behavior: none;
         }
 
         h2 {
@@ -23,6 +24,7 @@
             gap: 2px;
             width: fit-content;
             margin: 20px auto;
+            touch-action: none;
         }
 
         .pixel {
@@ -32,6 +34,7 @@
             border: 1px solid black;
             cursor: pointer;
             user-select: none;
+            touch-action: none;
         }
 
         .black {
@@ -77,26 +80,54 @@
 
         let drawing = false;
 
-        
+        function paint(pixel) {
+            pixel.classList.add("black");
+        }
+
         for (let i = 0; i < 100; i++) {
 
             const pixel = document.createElement("div");
             pixel.className = "pixel";
 
-            pixel.onmousedown = () => {
+            // Desktop
+            pixel.addEventListener("mousedown", (e) => {
+                e.preventDefault();
                 drawing = true;
-                pixel.classList.toggle("black");
-            };
+                paint(pixel);
+            });
 
-            pixel.onmouseenter = () => {
+            pixel.addEventListener("mouseenter", () => {
                 if (drawing)
-                    pixel.classList.add("black");
-            };
+                    paint(pixel);
+            });
+
+            // Mobile
+            pixel.addEventListener("touchstart", (e) => {
+                e.preventDefault();
+                drawing = true;
+                paint(pixel);
+            }, { passive: false });
 
             grid.appendChild(pixel);
         }
 
-        document.onmouseup = () => drawing = false;
+        document.addEventListener("mouseup", () => drawing = false);
+        document.addEventListener("touchend", () => drawing = false);
+
+        document.addEventListener("touchmove", (e) => {
+
+            if (!drawing) return;
+
+            e.preventDefault();
+
+            const touch = e.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+
+            if (element && element.classList.contains("pixel")) {
+                paint(element);
+            }
+
+        }, { passive: false });
 
         function clearGrid() {
             document.querySelectorAll(".pixel").forEach(pixel => {
@@ -113,7 +144,6 @@
                 return;
             }
 
-            
             const canvas = document.createElement("canvas");
             canvas.width = 100;
             canvas.height = 100;
